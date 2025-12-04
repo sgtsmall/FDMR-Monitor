@@ -1,34 +1,36 @@
 #!/usr/bin/env python3
 
 # Standard modules
-import logging
 from collections import deque
 from csv import DictReader as csv_dict_reader
+from datetime import date
 from json import load as jload
 from os.path import getmtime
 from pathlib import Path
-from pickle import  loads
-from time import time, strftime, localtime
-from datetime import date
+from pickle import loads
+from time import localtime, strftime, time
+
+# Autobahn provides websocket service under Twisted
+from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
+
+# Utilities from K0USY Group sister project
+from dmr_utils3.utils import bytes_4, int_id, try_download
+
+# Web templating environment
+from jinja2 import Environment, PackageLoader, select_autoescape
+from twisted.internet import reactor, task
+from twisted.internet.defer import inlineCallbacks
 
 # Twisted modules
 from twisted.internet.protocol import ReconnectingClientFactory
-from twisted.protocols.basic import NetstringReceiver
-from twisted.internet import reactor, task
 from twisted.internet.threads import deferToThread
-from twisted.internet.defer import inlineCallbacks
-# Autobahn provides websocket service under Twisted
-from autobahn.twisted.websocket import WebSocketServerProtocol, WebSocketServerFactory
-# Web templating environment
-from jinja2 import Environment, PackageLoader, select_autoescape
-# Utilities from K0USY Group sister project
-from dmr_utils3.utils import int_id, try_download, bytes_4
+from twisted.protocols.basic import NetstringReceiver
 
-# Local modules and config variables
-from mon_db import MoniDB
 from config import mk_config
 from log import create_logger
 
+# Local modules and config variables
+from mon_db import MoniDB
 
 # Increase the value if HBlink link break occurs
 NetstringReceiver.MAX_LENGTH = 500000000
@@ -207,7 +209,7 @@ def update_local(_table=None):
 
 
 # THESE ARE THE SAME THING FOR LEGACY PURPOSES
-# moved from dmr_urils3
+# moved from dmr_utils3
 def get_alias(_id, _dict, *args):
     if type(_id) == bytes:
         _id = int_id(_id)
